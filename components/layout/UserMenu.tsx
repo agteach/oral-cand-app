@@ -118,7 +118,20 @@ export default function UserMenu({ userName }: UserMenuProps) {
                         </div>
 
                         <div className="border-t border-slate-100 bg-white/95 px-4 py-4">
-                            <form action="/api/auth/signout" method="post">
+                            <form action="/api/auth/signout" method="post" className="space-y-3">
+                                <input type="hidden" name="callbackUrl" value="/login" />
+                                <button
+                                    type="submit"
+                                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" className="h-5 w-5">
+                                        <path d="M15 3h4a2 2 0 0 1 2 2v4" />
+                                        <path d="M9 21H5a2 2 0 0 1-2-2v-4" />
+                                        <path d="M21 3l-7 7" />
+                                        <path d="M3 21l7-7" />
+                                    </svg>
+                                    Sign in
+                                </button>
                                 <button
                                     type="submit"
                                     className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
