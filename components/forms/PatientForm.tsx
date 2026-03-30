@@ -8,7 +8,7 @@ interface PatientFormValues {
     patientId: string;
     dateOfExtraction: string;
     extractor: string;
-    age: number;
+    age: number | "";
     sex: string;
     education: string;
     artInitiation: string;
@@ -27,7 +27,7 @@ interface PatientFormValues {
     antibioticsDuration: string;
     surgeryHistory: string;
     surgeryDetails: string;
-    hospitalStayDays: number;
+    hospitalStayDays: number | "";
     diabetes: string;
     comments: string;
 }
@@ -36,7 +36,7 @@ const createInitialFormData = (): PatientFormValues => ({
     patientId: "",
     dateOfExtraction: new Date().toISOString().split("T")[0],
     extractor: "",
-    age: 0,
+    age: "",
     sex: "",
     education: "",
     artInitiation: "No",
@@ -55,7 +55,7 @@ const createInitialFormData = (): PatientFormValues => ({
     antibioticsDuration: "",
     surgeryHistory: "No",
     surgeryDetails: "",
-    hospitalStayDays: 0,
+    hospitalStayDays: "",
     diabetes: "No",
     comments: "",
 });
@@ -166,7 +166,7 @@ export default function PatientForm({ onSuccess, redirectTo }: PatientFormProps)
         const { name, value, type } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: type === "number" ? parseInt(value) || 0 : value,
+            [name]: type === "number" ? (value === "" ? "" : parseInt(value, 10) || 0) : value,
         }));
     };
 
@@ -190,6 +190,7 @@ export default function PatientForm({ onSuccess, redirectTo }: PatientFormProps)
         formData.patientId.trim().length > 0 &&
         formData.dateOfExtraction.trim().length > 0 &&
         formData.extractor.trim().length > 0 &&
+        formData.age !== "" &&
         formData.age > 0 &&
         formData.sex.trim().length > 0;
 
