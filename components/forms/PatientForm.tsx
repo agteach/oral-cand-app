@@ -1,6 +1,7 @@
 "use client";
 import { createPatient } from "@/app/actions/patientActions";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface PatientFormValues {
     patientId: string;
@@ -58,7 +59,12 @@ const createInitialFormData = (): PatientFormValues => ({
     comments: "",
 });
 
-export default function PatientForm() {
+type PatientFormProps = {
+    onSuccess?: () => void;
+};
+
+export default function PatientForm({ onSuccess }: PatientFormProps) {
+    const router = useRouter();
     const [formData, setFormData] = useState<PatientFormValues>(createInitialFormData);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -92,6 +98,8 @@ export default function PatientForm() {
             setSuccess(true);
             form.reset();
             setFormData(createInitialFormData());
+            router.refresh();
+            onSuccess?.();
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "Failed to save patient";
             setErrorMessage(message);

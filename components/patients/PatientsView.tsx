@@ -47,7 +47,7 @@ export default function PatientsView({ patients }: PatientsViewProps) {
 
             {showForm && (
                 <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6 md:p-8">
-                    <PatientForm />
+                    <PatientForm onSuccess={() => setShowForm(false)} />
                 </div>
             )}
 
