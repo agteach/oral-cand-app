@@ -1,97 +1,110 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import Charts from "@/components/Charts";
-import { calculateRisk } from "@/lib/riskScore";
-const prisma = new PrismaClient();
 
-export default async function Dashboard() {
-    const patients = await prisma.patient.findMany({
-        orderBy: { createdAt: "desc" },
-    });
-    const total = patients.length;
+const formatDate = (value: Date) =>
+    new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    }).format(value);
 
-    const candidiasisCount = patients.filter(
-        (p) => p.oralCandidiasis
-    ).length;
+export default async function DashboardPage() {
+    const [totalPatients, diagnosedCases, newThisMonth, chartPatients, recentPatients] = await Promise.all([
+        prisma.patient.count(),
+        prisma.patient.count({ where: { diagnosis: true } }),
+        prisma.patient.count({
+            where: {
+                createdAt: {
+                    gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+                },
+            },
+        }),
+        prisma.patient.findMany({
+            select: {
+                id: true,
+                diagnosis: true,
+                artInitiation: true,
+            },
+        }),
+        prisma.patient.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 5,
+            select: {
+                id: true,
+                patientId: true,
+                extractor: true,
+                diagnosis: true,
+                createdAt: true,
+            },
+        }),
+    ]);
 
-    const prevalence =
-        total > 0 ? ((candidiasisCount / total) * 100).toFixed(1) : 0;
-
-    const artCount = patients.filter((p) => p.artInitiated).length;
-
-    const artCoverage =
-        total > 0 ? ((artCount / total) * 100).toFixed(1) : 0;
-
-    const avgAge =
-        total > 0
-            ? (
-                patients.reduce((sum, p) => sum + p.age, 0) / total
-            ).toFixed(1)
-            : 0;
+    const diagnosisRate = totalPatients === 0 ? 0 : Math.round((diagnosedCases / totalPatients) * 100);
 
     return (
+        <div className="space-y-6 md:space-y-8">
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    Dashboard
+                </h1>
+                <p className="mt-2 text-sm text-gray-600 sm:text-base">
+                    Live overview of your oral candidiasis patient records
+                </p>
+            </div>
 
-        <div className="p-10">
-            <h1 className="text-2xl font-bold mb-6">Patient Records</h1>
-            <Charts patients={patients} />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white shadow p-4 rounded">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
                     <p className="text-sm text-gray-500">Total Patients</p>
-                    <p className="text-xl font-bold">{total}</p>
+                    <p className="mt-2 text-3xl font-bold text-blue-600 sm:text-4xl">{totalPatients}</p>
                 </div>
-
-                <div className="bg-white shadow p-4 rounded">
-                    <p className="text-sm text-gray-500">Candidiasis Rate</p>
-                    <p className="text-xl font-bold">{prevalence}%</p>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <p className="text-sm text-gray-500">Diagnosed Cases</p>
+                    <p className="mt-2 text-3xl font-bold text-orange-600 sm:text-4xl">{diagnosedCases}</p>
                 </div>
-
-                <div className="bg-white shadow p-4 rounded">
-                    <p className="text-sm text-gray-500">ART Coverage</p>
-                    <p className="text-xl font-bold">{artCoverage}%</p>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <p className="text-sm text-gray-500">New This Month</p>
+                    <p className="mt-2 text-3xl font-bold text-green-600 sm:text-4xl">{newThisMonth}</p>
                 </div>
-
-                <div className="bg-white shadow p-4 rounded">
-                    <p className="text-sm text-gray-500">Average Age</p>
-                    <p className="text-xl font-bold">{avgAge}</p>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <p className="text-sm text-gray-500">Diagnosis Rate</p>
+                    <p className="mt-2 text-3xl font-bold text-sky-600 sm:text-4xl">{diagnosisRate}%</p>
                 </div>
             </div>
-            <table className="w-full border border-gray-300">
-                <thead className="bg-gray-100">
-                    <tr>
 
-                        <th className="p-2 border">Code</th>
-                        <th className="p-2 border">Age</th>
-                        <th className="p-2 border">Sex</th>
-                        <th className="p-2 border">Candidiasis</th>
-                        <th className="p-2 border">ART</th>
-                        <th className="p-2 border">Risk %</th>
-                    </tr>
-                </thead>
+            <Charts patients={chartPatients} />
 
-                <tbody>
-                    {patients.map((p) => (
-                        <tr key={p.id}>
-                            <td className="p-2 border">{p.patientCode}</td>
-                            <td className="p-2 border">{p.age}</td>
-                            <td className="p-2 border">{p.sex}</td>
-                            <td className="p-2 border">
-                                {p.oralCandidiasis ? "Yes" : "No"}
-                            </td>
-                            <td className="p-2 border">
-                                {p.artInitiated ? "Yes" : "No"}
-                            </td>
-                            <td className="p-2 border">
-                                {calculateRisk(p)}%
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            <a
-                href="/api/export"
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow"
-            >
-                📥 Download Excel
-            </a>
+            <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
+                <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Recent Patients</h2>
+                    <p className="text-sm text-gray-500">{recentPatients.length} shown</p>
+                </div>
+
+                {recentPatients.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-gray-500 sm:py-16 sm:text-base">
+                        No patient records yet.
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {recentPatients.map((patient) => (
+                            <div
+                                key={patient.id}
+                                className="flex flex-col gap-3 rounded-2xl border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                            >
+                                <div>
+                                    <p className="text-base font-semibold text-gray-900">{patient.patientId}</p>
+                                    <p className="text-sm text-gray-500">
+                                        Added on {formatDate(patient.createdAt)} by {patient.extractor}
+                                    </p>
+                                </div>
+
+                                <span className={`w-fit rounded-full px-3 py-1 text-xs font-medium ${patient.diagnosis ? "bg-orange-100 text-orange-700" : "bg-emerald-100 text-emerald-700"}`}>
+                                    {patient.diagnosis ? "Diagnosed" : "No diagnosis"}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

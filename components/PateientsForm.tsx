@@ -6,12 +6,13 @@ export default function PatientForm() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setMessage("");
 
-        const formData = new FormData(e.target);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
 
         const data = {
             patientCode: formData.get("patientCode"),
@@ -33,11 +34,11 @@ export default function PatientForm() {
 
             if (res.ok) {
                 setMessage("✅ Saved successfully");
-                e.target.reset();
+                form.reset();
             } else {
                 setMessage("❌ Failed to save");
             }
-        } catch (err) {
+        } catch {
             setMessage("❌ Error occurred");
         }
 

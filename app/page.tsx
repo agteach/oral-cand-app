@@ -1,12 +1,5 @@
-import { redirect, } from "next/navigation";
-import PatientForm from "@/components/PateientsForm";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-
-  redirect('/login')
-  return (
-    <div className="p-10">
-      <PatientForm />
-    </div>
-  );
+  redirect("/login");
 }

@@ -8,30 +8,46 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   password  String
-  role      String   @default("admin")
-  createdAt DateTime @default(now())
+  role      String    @default("admin")
+  createdAt DateTime  @default(now())
+  Patient   Patient[]
 }
 
 model Patient {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
+  id                  String    @id @default(cuid())
+  patientId           String    @unique
+  dateOfExtraction    DateTime
+  extractor           String
+  age                 Int
+  sex                 String
+  education           String?
+  artInitiation       Boolean
+  artDate             DateTime?
+  cd4Count            String?
+  cd4Date             DateTime?
+  viralLoad           String?
+  diagnosis           Boolean
+  diagnosisDate       DateTime?
+  lesionType          String?
+  otherLesion         String?
+  antifungalsUsed     Boolean
+  antifungalType      String?
+  antifungalDuration  String?
+  antibioticsUsed     Boolean
+  antibioticsDuration String?
+  surgeryHistory      Boolean
+  surgeryDetails      String?
+  hospitalStayDays    Int       @default(0)
+  diabetes            Boolean
+  comments            String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  patientCode String   @unique
-  age         Int
-  sex         String
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  artInitiated Boolean
-  cd4Count     Int?
-  viralLoad    Int?
-
-  oralCandidiasis Boolean
-  lesionType      String?
-
-  antifungalUsed Boolean
-  diabetes       Boolean?
-
-  hospitalStayDays Int?
+  @@map("patients")
 }

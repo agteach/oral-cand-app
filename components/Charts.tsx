@@ -2,10 +2,21 @@
 
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-export default function Charts({ patients }: any) {
+type ChartPatient = {
+    diagnosis?: boolean | null;
+    oralCandidiasis?: boolean | null;
+    artInitiation?: boolean | null;
+    artInitiated?: boolean | null;
+};
+
+type ChartsProps = {
+    patients: ChartPatient[];
+};
+
+export default function Charts({ patients }: ChartsProps) {
     const total = patients.length;
 
-    const positive = patients.filter((p: any) => p.oralCandidiasis).length;
+    const positive = patients.filter((patient) => patient.diagnosis ?? patient.oralCandidiasis ?? false).length;
     const negative = total - positive;
 
     const pieData = [
@@ -13,7 +24,7 @@ export default function Charts({ patients }: any) {
         { name: "Negative", value: negative },
     ];
 
-    const artYes = patients.filter((p: any) => p.artInitiated).length;
+    const artYes = patients.filter((patient) => patient.artInitiation ?? patient.artInitiated ?? false).length;
     const artNo = total - artYes;
 
     const barData = [
