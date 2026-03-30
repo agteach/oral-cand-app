@@ -174,7 +174,7 @@ export default function PatientForm({ onSuccess, redirectTo }: PatientFormProps)
         const checks = [
             formData.patientId.trim().length > 0,
             formData.extractor.trim().length > 0,
-            formData.age > 0,
+            formData.age !== "" && formData.age > 0,
             formData.sex.length > 0,
             formData.education.length > 0,
             formData.cd4Count.trim().length > 0,
