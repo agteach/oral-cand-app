@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentSession } from "@/lib/auth";
 
 type Bucket = {
     label: string;
@@ -81,7 +82,14 @@ function MetricBar({ item, total, tone }: { item: Bucket; total: number; tone: "
 }
 
 export default async function ReportsPage() {
+    const session = await getCurrentSession();
+
+    if (!session?.user?.id) {
+        return null;
+    }
+
     const patients = await prisma.patient.findMany({
+        where: { userId: session.user.id },
         orderBy: { createdAt: "asc" },
         select: {
             id: true,

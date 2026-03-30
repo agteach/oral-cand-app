@@ -1,9 +1,17 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentSession } from "@/lib/auth";
 import * as XLSX from "xlsx";
 
 export async function GET() {
     try {
+        const session = await getCurrentSession();
+
+        if (!session?.user?.id) {
+            return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const patients = await prisma.patient.findMany({
+            where: { userId: session.user.id },
             orderBy: { createdAt: "desc" },
         });
 
@@ -49,7 +57,7 @@ export async function GET() {
 
         return new Response(fileBytes, {
             headers: {
-                "Content-Disposition": 'attachment; filename="patients.xlsx"',
+                "Content-Disposition": 'attachment; filename="my-patients.xlsx"',
                 "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "Cache-Control": "no-store",
             },

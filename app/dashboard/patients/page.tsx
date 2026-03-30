@@ -1,8 +1,16 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentSession } from "@/lib/auth";
 import PatientsView from "@/components/patients/PatientsView";
 
 export default async function PatientsPage() {
+    const session = await getCurrentSession();
+
+    if (!session?.user?.id) {
+        return <PatientsView patients={[]} />;
+    }
+
     const patients = await prisma.patient.findMany({
+        where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
         select: {
             id: true,

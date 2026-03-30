@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Charts from "@/components/Charts";
+import { getCurrentSession } from "@/lib/auth";
 
 const formatDate = (value: Date) =>
     new Intl.DateTimeFormat("en-US", {
@@ -9,17 +10,27 @@ const formatDate = (value: Date) =>
     }).format(value);
 
 export default async function DashboardPage() {
+    const session = await getCurrentSession();
+
+    if (!session?.user?.id) {
+        return null;
+    }
+
+    const userWhere = { userId: session.user.id };
+
     const [totalPatients, diagnosedCases, newThisMonth, chartPatients, recentPatients] = await Promise.all([
-        prisma.patient.count(),
-        prisma.patient.count({ where: { diagnosis: true } }),
+        prisma.patient.count({ where: userWhere }),
+        prisma.patient.count({ where: { ...userWhere, diagnosis: true } }),
         prisma.patient.count({
             where: {
+                ...userWhere,
                 createdAt: {
                     gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
                 },
             },
         }),
         prisma.patient.findMany({
+            where: userWhere,
             select: {
                 id: true,
                 diagnosis: true,
@@ -27,6 +38,7 @@ export default async function DashboardPage() {
             },
         }),
         prisma.patient.findMany({
+            where: userWhere,
             orderBy: { createdAt: "desc" },
             take: 5,
             select: {

@@ -1,14 +1,22 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { getCurrentSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
     try {
+        const session = await getCurrentSession();
+
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const data = await req.json();
 
         const patient = await prisma.patient.create({
-            data,
+            data: {
+                ...data,
+                userId: session.user.id,
+            },
         });
 
         return NextResponse.json(patient);
@@ -19,7 +27,14 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
+    const session = await getCurrentSession();
+
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const patients = await prisma.patient.findMany({
+        where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
     });
 
