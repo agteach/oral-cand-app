@@ -1,8 +1,8 @@
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth(
-    function middleware() {
-        // You can add custom logic here later
+    function proxy() {
+        // Reserved for future route-level auth logic.
     },
     {
         pages: {
@@ -15,7 +15,5 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: [
-        "/dashboard/:path*",     // Protect everything under /dashboard
-    ],
+    matcher: ["/dashboard/:path*"],
 };

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import PatientForm from "@/components/forms/PatientForm";
+import Link from "next/link";
 
 type PatientRow = {
     id: string;
@@ -27,31 +26,23 @@ const formatDate = (value: string) =>
     }).format(new Date(value));
 
 export default function PatientsView({ patients }: PatientsViewProps) {
-    const [showForm, setShowForm] = useState(false);
-
     return (
-        <div className="space-y-6 md:space-y-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-5 sm:space-y-6 md:space-y-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Patients</h1>
                     <p className="mt-1 text-sm text-gray-600 sm:text-base">Manage your oral candidiasis patients</p>
                 </div>
 
-                <button
-                    onClick={() => setShowForm(!showForm)}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 sm:w-auto sm:px-6"
+                <Link
+                    href="/dashboard/patients/new"
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 sm:w-auto sm:px-6"
                 >
-                    {showForm ? "Hide Form" : "+ New Patient"}
-                </button>
+                    + New Patient
+                </Link>
             </div>
 
-            {showForm && (
-                <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6 md:p-8">
-                    <PatientForm onSuccess={() => setShowForm(false)} />
-                </div>
-            )}
-
-            <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
+            <div className="rounded-[1.75rem] border border-gray-100 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-8">
                 <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <h2 className="text-xl font-semibold">Patient List</h2>
                     <p className="text-sm text-gray-500">
@@ -62,14 +53,14 @@ export default function PatientsView({ patients }: PatientsViewProps) {
                 {patients.length === 0 ? (
                     <div className="py-12 text-center text-sm text-gray-500 sm:py-16 sm:text-base">
                         No patients registered yet.<br />
-                        Click `New Patient` to add your first patient.
+                        Open `New Patient` to add your first patient.
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-4 md:hidden">
+                        <div className="space-y-3 md:hidden">
                             {patients.map((patient) => (
-                                <article key={patient.id} className="rounded-2xl border border-gray-200 p-4">
-                                    <div className="flex items-start justify-between gap-3">
+                                <article key={patient.id} className="rounded-2xl border border-gray-200 p-4 shadow-sm">
+                                    <div className="flex flex-col gap-3">
                                         <div>
                                             <p className="text-lg font-semibold text-gray-900">{patient.patientId}</p>
                                             <p className="text-sm text-gray-500">{patient.extractor}</p>
@@ -79,7 +70,7 @@ export default function PatientsView({ patients }: PatientsViewProps) {
                                         </span>
                                     </div>
 
-                                    <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                                    <dl className="mt-1 grid grid-cols-2 gap-3 text-sm">
                                         <div>
                                             <dt className="text-gray-500">Age</dt>
                                             <dd className="font-medium text-gray-900">{patient.age}</dd>

@@ -8,12 +8,14 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  role      String    @default("admin")
-  createdAt DateTime  @default(now())
-  Patient   Patient[]
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  password             String
+  role                 String    @default("admin")
+  resetPasswordToken   String?   @unique
+  resetPasswordExpires DateTime?
+  createdAt            DateTime  @default(now())
+  Patient              Patient[]
 }
 
 model Patient {

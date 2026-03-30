@@ -1,26 +1,36 @@
 import { getCurrentSession } from "@/lib/auth";
+import UserMenu from "@/components/layout/UserMenu";
+import MobileMenuButton from "@/components/layout/MobileMenuButton";
+import NavbarVisibility from "@/components/layout/NavbarVisibility";
 
 export default async function Navbar() {
     const session = await getCurrentSession();
+    const userName = session?.user?.name || "Doctor";
 
     return (
-        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 md:px-8">
-            <div className="flex items-center justify-between gap-3">
-                <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-600">Oral Candidiasis</p>
-                    <h2 className="text-lg font-semibold text-gray-800 sm:text-xl">Dashboard</h2>
-                </div>
+        <NavbarVisibility>
+            <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+                <div className="px-3 py-3 sm:px-6 sm:py-4 md:px-8">
+                    <div className="rounded-[1.6rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(248,250,252,0.95),rgba(239,246,255,0.95),rgba(240,253,250,0.9))] px-4 py-4 shadow-[0_18px_45px_-35px_rgba(15,23,42,0.5)] sm:px-5 sm:py-5">
+                        <div className="flex items-start justify-between gap-3 sm:items-center">
+                            <div className="flex min-w-0 items-start gap-3 sm:items-center">
+                                <MobileMenuButton />
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-700">
+                                    <span className="block">Oral Candidiasis</span>
+                                    <span className="mt-2 block text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                                        Clinical Dashboard
+                                    </span>
+                                    <span className="mt-1 block text-sm normal-case tracking-normal text-slate-600">
+                                        Mobile-ready patient management and reporting.
+                                    </span>
+                                </p>
+                            </div>
 
-                <div className="flex min-w-0 items-center gap-3">
-                    <div className="min-w-0 text-right">
-                        <p className="truncate text-sm font-medium">{session?.user?.name || "Doctor"}</p>
-                        <p className="truncate text-xs text-gray-500">{session?.user?.email}</p>
-                    </div>
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
-                        {(session?.user?.name || "D")[0]}
+                            <UserMenu userName={userName} />
+                        </div>
                     </div>
                 </div>
-            </div>
-        </header>
+            </header>
+        </NavbarVisibility>
     );
 }
